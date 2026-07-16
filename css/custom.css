@@ -1,7 +1,7 @@
 .app-frame {
-  max-width: 600px;
-  width: 90%;
-  aspect-ratio: 9 / 16;
+  max-width: 700px;
+  width: 95%;
+  height: 800px;
   margin: 0 auto;
   border-radius: 16px;
   overflow: hidden;
