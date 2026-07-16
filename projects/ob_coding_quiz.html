@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obstetric Coding Drill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14181f;
+    --surface:#1c222c;
+    --surface2:#232a35;
+    --border:#2a323f;
+    --text:#e5e2da;
+    --muted:#8b93a1;
+    --teal:#4f9d8f;
+    --amber:#c98a3e;
+    --red:#b8564f;
+    --violet:#8a7ca8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  #app{max-width:760px;margin:0 auto;padding:28px 20px 60px;}
+
+  header{
+    display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:22px;
+  }
+  header h1{font-size:16px;font-weight:600;letter-spacing:.02em;margin:0;}
+  #abstract-id{font-size:12px;color:var(--muted);letter-spacing:.04em;}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:22px;
+    margin-bottom:16px;
+  }
+
+  /* ---- Setup screen ---- */
+  .field-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;font-weight:600;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+  .chip{
+    padding:7px 13px;border:1px solid var(--border);border-radius:999px;
+    font-size:13px;cursor:pointer;color:var(--muted);background:transparent;
+    transition:all .12s ease;
+  }
+  .chip:hover{border-color:var(--teal);color:var(--text);}
+  .chip.active{background:rgba(79,157,143,.18);border-color:var(--teal);color:var(--text);}
+  .level-row{display:flex;gap:8px;margin-bottom:20px;}
+  .level-btn{
+    flex:1;padding:10px;border:1px solid var(--border);border-radius:6px;
+    background:transparent;color:var(--muted);cursor:pointer;font-size:13px;font-weight:500;
+  }
+  .level-btn.active{border-color:var(--amber);color:var(--text);background:rgba(201,138,62,.14);}
+  .btn{
+    padding:11px 20px;border-radius:6px;border:1px solid var(--teal);
+    background:var(--teal);color:#0e1512;font-weight:600;font-size:14px;cursor:pointer;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn.secondary{background:transparent;color:var(--text);border-color:var(--border);}
+  .btn.secondary:hover{border-color:var(--muted);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;}
+
+  /* ---- Question screen ---- */
+  .progress-track{height:3px;background:var(--border);border-radius:2px;margin-bottom:18px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--teal);transition:width .25s ease;}
+  .topic-tag{
+    display:inline-block;font-size:11px;font-weight:600;letter-spacing:.05em;
+    text-transform:uppercase;color:var(--violet);margin-bottom:10px;
+  }
+  .qtype-tag{font-size:11px;color:var(--muted);float:right;text-transform:uppercase;letter-spacing:.05em;}
+  .question-text{font-size:16px;line-height:1.6;margin:6px 0 18px;white-space:pre-wrap;}
+  .option{
+    display:block;width:100%;text-align:left;padding:13px 15px;margin-bottom:9px;
+    border:1px solid var(--border);border-radius:6px;background:var(--surface2);
+    color:var(--text);font-size:14px;cursor:pointer;font-family:'IBM Plex Mono',monospace;
+  }
+  .option:hover{border-color:var(--teal);}
+  .option.selected{border-color:var(--teal);background:rgba(79,157,143,.14);}
+  .option.correct{border-color:var(--teal);background:rgba(79,157,143,.22);}
+  .option.incorrect{border-color:var(--red);background:rgba(184,86,79,.18);}
+  .option:disabled{cursor:default;}
+
+  textarea.freetext{
+    width:100%;min-height:80px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:6px;color:var(--text);padding:12px;font-family:'IBM Plex Mono',monospace;
+    font-size:13px;resize:vertical;
+  }
+
+  .rationale{
+    margin-top:16px;padding:14px 16px;border-left:3px solid var(--teal);
+    background:rgba(79,157,143,.08);border-radius:0 4px 4px 0;font-size:13.5px;line-height:1.6;
+  }
+  .rationale.miss{border-left-color:var(--red);background:rgba(184,86,79,.08);}
+  .rationale b{color:var(--text);}
+  .ref{font-size:11.5px;color:var(--muted);margin-top:8px;font-style:italic;}
+
+  .footer-row{display:flex;justify-content:space-between;align-items:center;margin-top:18px;}
+  #score-live{font-size:12px;color:var(--muted);}
+  #score-live b{color:var(--text);}
+
+  /* ---- Summary screen ---- */
+  .summary-score{font-size:42px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin:0 0 4px;}
+  .miss-item{padding:12px 0;border-bottom:1px solid var(--border);}
+  .miss-item:last-child{border-bottom:none;}
+  .sixth-digit-dial{display:flex;gap:4px;margin:16px 0;}
+  .sd{
+    flex:1;text-align:center;padding:8px 0;border-radius:4px;font-size:11px;
+    font-family:'IBM Plex Mono',monospace;color:var(--muted);border:1px solid var(--border);
+  }
+
+  .error-box{color:var(--red);font-size:12px;margin-top:10px;}
+  .loading{color:var(--muted);font-size:13px;font-style:italic;}
+  #ai-status{font-size:12px;color:var(--muted);margin-top:10px;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Obstetric Coding Drill</h1>
+    <span id="abstract-id" class="mono">ABSTRACT #--</span>
+  </header>
+  <div id="screen"></div>
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// Hardcoded question bank — verified against the CIHI Canadian Coding
+// Standards for ICD-10-CA and CCI (2022) and AHS obstetric coding tips.
+// ---------------------------------------------------------------
+const BANK = [
+  {
+    id:'b1', topic:'Sixth Digit', level:1, type:'mc',
+    q:'Which sixth digit denotes "delivered, with mention of postpartum or puerperal complication during the current episode of care"?',
+    options:['1','2','3','4'], answer:1,
+    rationale:'Sixth digit 2 = delivered, with mention of postpartum condition arising after delivery. Sixth digit 1 covers antepartum/intrapartum instead.',
+    ref:'CIHI Canadian Coding Standards for ICD-10-CA and CCI (2022) — "Selection of the Sixth Digit in Obstetrical Coding"'
+  },
+  {
+    id:'b2', topic:'Sixth Digit', level:1, type:'mc',
+    q:'Sixth digit "3" (antepartum condition or complication) may be assigned:',
+    options:['Alone only','With "1" only','With "2" only','With any other digit'], answer:0,
+    rationale:'3, 4, and 9 must each be used alone on the abstract — never combined with any other sixth digit. Only 1 and 2 can pair with each other.',
+    ref:'CIHI Canadian Coding Standards for ICD-10-CA and CCI (2022) — "Allowable Sixth-Digit Combinations" table'
+  },
+  {
+    id:'b3', topic:'Sixth Digit', level:1, type:'mc',
+    q:'True or False: Placenta previa can be assigned sixth digit "2".',
+    options:['True','False'], answer:1,
+    rationale:'False. Placenta previa occurs only in the antepartum period, so only sixth digits 1, 3, or 9 apply to it — never 2 or 4.',
+    ref:'CIHI Canadian Coding Standards for ICD-10-CA and CCI (2022) — sixth-digit note on conditions occurring at only one point in the obstetric period'
+  },
+  {
+    id:'b4', topic:'Water Birth / CSE', level:1, type:'mc',
+    q:'A baby is born fully submerged in a tub during a planned water immersion delivery. Which is required?',
+    options:[
+      'Code as manually assisted spontaneous vaginal delivery',
+      'Mandatory CCI code 5.MD.52.^^ Water Birth',
+      'No intervention code required',
+      'Code only if a complication occurred'
+    ], answer:1,
+    rationale:'5.MD.52.^^ Water Birth is mandatory whenever the birth itself occurs submerged — it replaces (not supplements) a manual/spontaneous vaginal delivery code.',
+    ref:'AHS Coding Tip: Water Birth Deliveries (rev. 2026-07-02)'
+  },
+  {
+    id:'b5', topic:'Water Birth / CSE', level:1, type:'mc',
+    q:'Patient labours in a birthing tub but gets out and delivers on the bed. Is 5.MD.52.^^ assigned?',
+    options:['Yes, mandatory','No — water immersion therapy with delivery out of water is explicitly excluded'], answer:1,
+    rationale:'Labouring in water with delivery occurring outside the water is "water immersion therapy," explicitly excluded from 5.MD.52.^^ and not mandatory to capture at all.',
+    ref:'AHS Coding Tip: Water Birth Deliveries (rev. 2026-07-02)'
+  },
+  {
+    id:'b6', topic:'Sixth Digit', level:2, type:'mc',
+    q:'An abstract has an antepartum complication (sixth digit 1) AND a postpartum hemorrhage (sixth digit 2) in the same episode. Is this a valid combination?',
+    options:['Valid — 1 and 2 may pair','Invalid — 1 can only stand alone','Invalid — mixing digits is never allowed','Valid only if 1 is the MRDx'], answer:0,
+    rationale:'1 and 2 are the only pair that can legitimately coexist on the same abstract, since a patient can have both an ante/intrapartum condition and a postpartum condition in one delivery episode.',
+    ref:'CIHI Canadian Coding Standards for ICD-10-CA and CCI (2022) — "Allowable Sixth-Digit Combinations" table'
+  },
+  {
+    id:'b7', topic:'Water Birth / CSE', level:2, type:'mc',
+    q:'Patient receives an epidural during labour; block proves inadequate, so a spinal is given instead for the delivery itself. How is Anaesthetic Technique "C — Combined spinal and epidural" handled?',
+    options:[
+      'Assign C, since both techniques were used',
+      'Do not assign C — this is sequential, not a purposeful combination; code Administration of Analgesia = epidural during labour, spinal captured separately on the delivery code',
+      'Assign C only on the delivery code, ignore the epidural entirely',
+      'Query the anesthesiologist before coding anything'
+    ], answer:1,
+    rationale:'CSE (technique C) applies only when both were purposely administered in combination. An epidural later swapped for a spinal is sequential, not combined — code the epidural under Administration of Analgesia and the spinal separately on the delivery intervention.',
+    ref:'AHS Coding Tip: Combined Epidural &amp; Spinal Anaesthetic Technique (rev. 2024-07-30), worked example 3'
+  },
+  {
+    id:'b8', topic:'D&C / Curettage', level:2, type:'mc',
+    q:'A D&C is performed for retained products of conception following a medical abortion. Which code range applies?',
+    options:['1.RM.87.^^ (non-gravid uterus branch)','5.PC.91.^^ (following delivery or abortion)','5.CA.89.^^ (surgical termination of pregnancy)'], answer:1,
+    rationale:'The v2022 standard gates D&C selection: gravid + termination intent → 5.CA.89.^^; following a delivery or abortion → 5.PC.91.^^; non-gravid uterus → 1.RM.87.^^. Retained POC after abortion falls in the "following an abortion" branch.',
+    ref:'AHS Coding Tip: Abortions and Stillbirths (rev. 2025-06-02), consistent with CIHI Canadian Coding Standards (2022) — "Dilation and Curettage"'
+  },
+  {
+    id:'b9', topic:'D&C / Curettage', level:2, type:'mc',
+    q:'A curettage case documents both aspiration and sharp curette technique used sequentially in the same procedure. How many technique codes are assigned?',
+    options:['One — code whichever occurred first','Two — one for each technique','Zero — curettage technique is not separately coded'], answer:0,
+    rationale:'CIHI directs coding only one technique for curettage (aspiration or curette), specifically whichever occurred first in the sequence — not both.',
+    ref:'Edmonton Zone Dilation and Curettage Case Study Review (Feb 2025)'
+  },
+  {
+    id:'b10', topic:'PPH', level:2, type:'mc',
+    q:'What blood-loss threshold defines postpartum hemorrhage after a Cesarean delivery (absent uterine atony or physician documentation of PPH)?',
+    options:['>500 cc','>750 cc','>1,000 cc','>1,500 cc'], answer:2,
+    rationale:'The threshold is delivery-mode specific: >500cc for vaginal delivery, >1,000cc for Cesarean delivery — unless uterine atony is documented or the physician states PPH outright, in which case the threshold is irrelevant.',
+    ref:'CIHI Canadian Coding Standards for ICD-10-CA and CCI (2022) — "Postpartum Haemorrhage" directive statement'
+  },
+  {
+    id:'b11', topic:'Sixth Digit / MRDx', level:3, type:'case',
+    q:'CASE: A patient with gestational diabetes is admitted for induction of labour. She has a spontaneous vaginal delivery with a second-degree perineal laceration, repaired. She develops postpartum hemorrhage due to retained placenta.\n\nAssign diagnosis type for the gestational diabetes code (O24.801).',
+    accept:['m','mrdx'],
+    rationale:'Type (M). Exception 1 applies — the diabetes is the reason labour was induced, making it MRDx, even though the sixth digit is 1 (which would normally align with type 1).',
+    ref:'CIHI Canadian Coding Standards for ICD-10-CA and CCI (2022) — "Diagnosis Typing for the Delivery Episode of Care," Case 1'
+  },
+  {
+    id:'b12', topic:'Sixth Digit / MRDx', level:3, type:'case',
+    q:'Same case as above. Assign diagnosis type for the postpartum hemorrhage due to retained placenta.',
+    accept:['2','type 2'],
+    rationale:'Type (2). This is a significant obstetric condition occurring after delivery of the infant — sixth digit and diagnosis type align, no exception needed.',
+    ref:'CIHI Canadian Coding Standards for ICD-10-CA and CCI (2022) — "Diagnosis Typing for the Delivery Episode of Care," Case 1'
+  },
+  {
+    id:'b13', topic:'MRDx Reasoning', level:3, type:'case',
+    q:'CASE: Patient admitted with severe pre-eclampsia. Day 2, she suffers an acute STEMI. Day 4, emergency C-section. Assign diagnosis type for the circulatory-disease-complicating-pregnancy code capturing the MI.',
+    accept:['2','type 2'],
+    rationale:'Type (2), via Exception 3 — an MI is not itself a pregnancy-specific condition (it can occur in a non-pregnant patient), so general diagnosis-typing rules apply. Type 2 denotes it arose post-admission, even though it occurred prior to delivery.',
+    ref:'CIHI Canadian Coding Standards for ICD-10-CA and CCI (2022) — "Diagnosis Typing for the Delivery Episode of Care," Case 2'
+  },
+  {
+    id:'b14', topic:'MRDx Reasoning', level:3, type:'case',
+    q:'CASE: Marginal placenta previa (no bleeding) documented at 32-week admission. Two days later, preterm labour begins; emergency Cesarean follows. No operative note excerpt is given stating why the C-section was performed. What is the correct next step for assigning MRDx — and why?',
+    accept:['query','review op note','check operative note','check delivery note','indication'],
+    rationale:'Do not assume either condition drove the C-section. Pull the operative/delivery note for the stated indication for the Cesarean and assign MRDx to whatever that indication maps to. If nothing is documented, this is a physician query — a marginal previa in particular does not automatically preclude a vaginal trial, so causation cannot be assumed from timing alone.',
+    ref:'Reasoning derived from CIHI Canadian Coding Standards (2022) — "Diagnosis Typing for the Delivery Episode of Care," Cases 1–2 — the causal link to the intervention must be documented, not inferred'
+  },
+  {
+    id:'b15', topic:'D&C / Curettage', level:3, type:'case',
+    q:'The Obstetrical Coding Guide flags a possible conflict: one source describes D&C techniques (curettage, device NEC, LEEP, laser) all coded to 1.RM.87.^^ with no mention of pregnancy status. What is the risk of relying on that source alone, and what governs instead?',
+    accept:['non-gravid', 'delivery', 'abortion', 'gravid'],
+    rationale:'1.RM.87.^^ only applies to the non-gravid-uterus branch. The source is silent on the two branches that come first in the current standard\'s decision tree: termination-intent D&C (5.CA.89.^^) and D&C following a delivery or abortion (5.PC.91.^^). Relying on the source alone risks defaulting to 1.RM.87.^^ in a pregnancy/delivery/abortion context where it does not apply.',
+    ref:'Edmonton Zone Dilation and Curettage Case Study Review (Feb 2025), compared against CIHI Canadian Coding Standards (2022) — "Dilation and Curettage"'
+  },
+  {
+    id:'b16', topic:'Newborn Sequencing', level:3, type:'mc',
+    q:'The consolidated guide includes a CIHI sequencing table (birth-weight bands vs. P05/P07 codes) sourced from one scanned document. What is the correct stance on using it as-is?',
+    options:[
+      'Treat as confirmed-current — CIHI tables don\'t change',
+      'Treat as needing verification against current Codefinder/Folio before use — source is undated, single-sourced, and not cross-confirmed against CodingStandards_v2022',
+      'Discard entirely — scanned sources are never usable'
+    ], answer:1,
+    rationale:'The guide explicitly flags this table as unverifiable against the other reference documents available in the project — appropriate handling is "needs verification," not blind trust or blind rejection.',
+    ref:'Scanned CIHI training-module excerpts (c. CCS v2015 vintage) — unverified against CIHI Canadian Coding Standards (2022)'
+  }
+];
+
+const TOPICS = [...new Set(BANK.map(q=>q.topic))];
+
+let state = {
+  screen:'setup',
+  selectedTopics:[],
+  level:'mixed',
+  queue:[],
+  idx:0,
+  score:0,
+  missed:[],
+  answered:false
+};
+
+function setAbstractId(){
+  document.getElementById('abstract-id').textContent =
+    'ABSTRACT #' + String(Math.floor(100000+Math.random()*899999));
+}
+setAbstractId();
+
+function render(){
+  const el = document.getElementById('screen');
+  if(state.screen==='setup') el.innerHTML = renderSetup();
+  else if(state.screen==='question') el.innerHTML = renderQuestion();
+  else if(state.screen==='summary') el.innerHTML = renderSummary();
+  attachHandlers();
+}
+
+function renderSetup(){
+  return `
+    <div class="card">
+      <div class="field-label">Topics (leave all unselected for mixed)</div>
+      <div class="chip-row" id="topic-chips">
+        ${TOPICS.map(t=>`<button class="chip ${state.selectedTopics.includes(t)?'active':''}" data-topic="${t}">${t}</button>`).join('')}
+      </div>
+      <div class="field-label">Level</div>
+      <div class="level-row" id="level-row">
+        ${['mixed',1,2,3].map(l=>`<button class="level-btn ${state.level==l?'active':''}" data-level="${l}">${l==='mixed'?'Mixed':'Level '+l}</button>`).join('')}
+      </div>
+      <div class="hint">${BANK.length} questions in the bank, filtered by your selections above.</div>
+      <button class="btn" id="start-btn" style="margin-top:14px;">Start drill</button>
+    </div>
+  `;
+}
+
+function buildQueue(){
+  let pool = BANK.filter(q=>{
+    const topicOk = state.selectedTopics.length===0 || state.selectedTopics.includes(q.topic);
+    const levelOk = state.level==='mixed' || q.level==Number(state.level);
+    return topicOk && levelOk;
+  });
+  // shuffle
+  pool = pool.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+  state.queue = pool;
+  state.idx = 0;
+  state.score = 0;
+  state.missed = [];
+}
+
+function renderQuestion(){
+  if(state.idx >= state.queue.length){
+    state.screen='summary';
+    return renderSummary();
+  }
+  const q = state.queue[state.idx];
+  const pct = Math.round((state.idx/state.queue.length)*100);
+  let body = '';
+  if(q.type==='mc'){
+    body = q.options.map((opt,i)=>`
+      <button class="option" data-idx="${i}" ${state.answered?'disabled':''}>${opt}</button>
+    `).join('');
+  } else {
+    body = `<textarea class="freetext" id="free-input" placeholder="Type your answer / rationale..."></textarea>
+            <button class="btn" id="submit-free" style="margin-top:10px;">Submit</button>`;
+  }
+  let rationaleBlock = '';
+  if(state.answered){
+    const correct = state.lastCorrect;
+    rationaleBlock = `
+      <div class="rationale ${correct?'':'miss'}">
+        <b>${correct?'Correct.':'Not quite.'}</b> ${q.rationale}
+        <div class="ref">${q.ref}</div>
+      </div>
+      <div class="footer-row">
+        <span id="score-live">Score: <b>${state.score}/${state.idx+1}</b></span>
+        <button class="btn" id="next-btn">Next →</button>
+      </div>
+    `;
+  }
+  return `
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="card">
+      <span class="topic-tag">${q.topic}</span>
+      <span class="qtype-tag mono">${q.type==='case'?'Case':'L'+q.level}</span>
+      <div class="question-text">${q.q}</div>
+      ${state.answered ? renderAnsweredOptions(q) : body}
+      ${rationaleBlock}
+    </div>
+  `;
+}
+
+function renderAnsweredOptions(q){
+  if(q.type!=='mc') return `<div class="mono" style="font-size:13px;color:var(--muted);margin-bottom:10px;">Your answer recorded.</div>`;
+  return q.options.map((opt,i)=>{
+    let cls='option';
+    if(i===q.answer) cls+=' correct';
+    else if(i===state.lastPicked) cls+=' incorrect';
+    return `<button class="${cls}" disabled>${opt}</button>`;
+  }).join('');
+}
+
+function renderSummary(){
+  const total = state.queue.length;
+  return `
+    <div class="card">
+      <div class="field-label">Session complete</div>
+      <p class="summary-score">${state.score}/${total}</p>
+      ${state.missed.length ? `
+        <div class="field-label" style="margin-top:20px;">Missed items</div>
+        ${state.missed.map(m=>`
+          <div class="miss-item">
+            <span class="topic-tag">${m.topic}</span>
+            <div class="mono" style="font-size:13px;margin:4px 0;">${m.q}</div>
+            <div class="ref">${m.ref}</div>
+          </div>
+        `).join('')}
+      ` : `<p class="hint">No misses this round.</p>`}
+      <div class="footer-row" style="margin-top:20px;">
+        <button class="btn secondary" id="restart-btn">Change settings</button>
+        <button class="btn" id="retry-btn">Retry same settings</button>
+      </div>
+    </div>
+  `;
+}
+
+function attachHandlers(){
+  document.querySelectorAll('[data-topic]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const t = btn.dataset.topic;
+      const i = state.selectedTopics.indexOf(t);
+      if(i>-1) state.selectedTopics.splice(i,1); else state.selectedTopics.push(t);
+      render();
+    };
+  });
+  document.querySelectorAll('[data-level]').forEach(btn=>{
+    btn.onclick = ()=>{ state.level = btn.dataset.level; render(); };
+  });
+  const startBtn = document.getElementById('start-btn');
+  if(startBtn) startBtn.onclick = ()=>{
+    buildQueue();
+    state.answered = false;
+    state.screen='question';
+    setAbstractId();
+    render();
+  };
+  document.querySelectorAll('.option[data-idx]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const q = state.queue[state.idx];
+      const picked = Number(btn.dataset.idx);
+      state.lastPicked = picked;
+      state.lastCorrect = picked===q.answer;
+      if(state.lastCorrect) state.score++;
+      else state.missed.push(q);
+      state.answered = true;
+      render();
+    };
+  });
+  const submitFree = document.getElementById('submit-free');
+  if(submitFree) submitFree.onclick = ()=>{
+    const val = (document.getElementById('free-input').value||'').toLowerCase();
+    const q = state.queue[state.idx];
+    const hit = q.accept.some(k=>val.includes(k.toLowerCase()));
+    state.lastCorrect = hit;
+    if(hit) state.score++; else state.missed.push(q);
+    state.answered = true;
+    render();
+  };
+  const nextBtn = document.getElementById('next-btn');
+  if(nextBtn) nextBtn.onclick = ()=>{
+    state.idx++;
+    state.answered = false;
+    render();
+  };
+  const restartBtn = document.getElementById('restart-btn');
+  if(restartBtn) restartBtn.onclick = ()=>{ state.screen='setup'; render(); };
+  const retryBtn = document.getElementById('retry-btn');
+  if(retryBtn) retryBtn.onclick = ()=>{
+    buildQueue();
+    state.answered = false;
+    state.screen='question';
+    setAbstractId();
+    render();
+  };
+}
+
+render();
+</script>
+</body>
+</html>
